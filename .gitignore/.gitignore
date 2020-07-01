@@ -1,0 +1,13 @@
+/db/
+/incremental_db/
+/output_files/
+/simulation/
+*.bak
+*.bat
+*.cmp
+*.temp
+*.qdf
+*.qip
+*.qpf
+*.qsf
+*.qws
