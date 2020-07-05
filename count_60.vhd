@@ -7,8 +7,11 @@ USE work.Counters.ALL;
 ENTITY count_60 IS
     PORT (
         clk, qd, set, clr, mode, clk_en : IN std_logic;
+        --clk输入脉冲，qd手动设置脉冲，set对应位设置状态，clr异步重置，mode区分闹钟和时间，clk_en时钟使能
         min_sec : OUT std_logic_vector(7 DOWNTO 0);
+        --分/秒BCD码
         carry : OUT std_logic
+        --进位输出
     );
 END count_60;
 
@@ -17,49 +20,27 @@ ARCHITECTURE count_60 OF count_60 IS
     SIGNAL clkms : std_logic;
     SIGNAL carryL : std_logic;
     SIGNAL carryH : std_logic;
-	 SIGNAL EN : std_logic;
+    SIGNAL EN : std_logic;
 BEGIN
-    clkms <= qd  WHEN (mode = '1' AND set = '1') ELSE
-             clk WHEN (mode = '0');
-	 EN <= (mode and set) or (clk_en and not mode);
-    lowbits: count_09 PORT MAP(
+    clkms <= qd WHEN (mode = '1' AND set = '1') ELSE
+        clk WHEN (mode = '0');
+    --正常状态采用clk作为时钟，设置并选中状态采用qd作为时钟
+    EN <= (mode AND set) OR (clk_en AND NOT mode);
+    lowbits : count_09 PORT MAP(
         aclr => clr,
-		  clk_en => EN,
+        clk_en => EN,
         clock => clkms,
         cout => carryL,
-        q => t(3 downto 0)
+        q => t(3 DOWNTO 0)
     );
-    highbits: count_05 PORT MAP(
+    highbits : count_05 PORT MAP(
         aclr => clr,
-		  clk_en => carryL and EN,
+        clk_en => carryL AND EN,
         clock => clkms,
         cout => carryH,
-        q => t(6 downto 4)
+        q => t(6 DOWNTO 4)
     );
-	 t(7) <= '0';
-	 carry <= not (carryH and carryL) and not mode;
-	 
-    --PROCESS (clkms, clr, mode)
-    --BEGIN
-        --IF (clr = '1') THEN
-            --t <= "00000000";
-        --ELSIF (rising_edge(clkms)) THEN
-            --CASE t(3 DOWNTO 0) IS
-                --WHEN "1001" =>
-                    --CASE t(7 DOWNTO 4) IS
-                        --WHEN "0101" => t <= "00000000";
-                        --WHEN OTHERS => t(7 DOWNTO 4) <= t(7 DOWNTO 4) + 1;
-                            --t(3 DOWNTO 0) <= "0000";
-                    --END CASE;
-                --WHEN OTHERS => t <= t + 1;
-            --END CASE;
-            --IF (t = "01011001" AND mode = '0') THEN
-                --carry <= '1';
-            --ELSE
-                --carry <= '0';
-            --END IF;
-        --END IF;
-    --END PROCESS;
-    
+    t(7) <= '0';
+    carry <= NOT (carryH AND carryL) AND NOT mode;
     min_sec <= t;
 END count_60;
