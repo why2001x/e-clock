@@ -28,7 +28,7 @@ BEGIN
             IF (mode(0) = '1' OR mode(1) = '1') THEN
                 cnt <= "00";
                 state <= '0';
-            --设置状态关闭所有响铃
+                --设置状态关闭所有响铃
             ELSIF (mode(2) = '1' AND mint = a_mint AND hour = a_hour) THEN
                 CASE cnt IS
                     WHEN "00" =>
@@ -36,17 +36,17 @@ BEGIN
                         state <= NOT state;
                     WHEN OTHERS => cnt <= cnt - 1;
                 END CASE;
-            --闹钟匹配，将高频输入4分频得到铃音，持续一分钟或者手动关闭闹钟
+                --闹钟匹配，将高频输入4分频得到铃音，持续一分钟或者手动关闭闹钟
             ELSIF (mint = "01011001" AND secd = "01011001") THEN
                 cnt <= "11";
-            --时钟即将变化，设置整点报时计数器
+                --时钟即将变化，设置整点报时计数器
             ELSIF (cnt > 0) THEN
                 cnt <= cnt - 1;
                 state <= NOT state;
-            --整点报时，将高频输入2分频并持续两个脉冲
+                --整点报时，将高频输入2分频并持续两个脉冲
             ELSE
                 state <= '0';
-            --无响铃事件重置计数器和状态
+                --无响铃事件重置计数器和状态
             END IF;
         END IF;
     END PROCESS;

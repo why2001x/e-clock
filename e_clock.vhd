@@ -4,7 +4,7 @@ USE ieee.std_logic_unsigned.ALL;
 
 ENTITY e_clock IS
     PORT (
-        clk, clk_high, qd : IN std_logic;
+        clk_high, qd : IN std_logic;
         --clk时钟脉冲，clk_high高频铃声脉冲，qd手动输入脉冲
         clr, set, mode : IN std_logic_vector(2 DOWNTO 0);
         --clr异步重置，set设置选中，高位到低位对应时分秒
@@ -16,6 +16,7 @@ ENTITY e_clock IS
         --蜂鸣器
 
         --output test port--
+        --clk_out : OUT std_logic
         --s0tmp : OUT std_logic_vector(3 DOWNTO 0);
         --crrtest : OUT std_logic;
     );
@@ -23,6 +24,12 @@ END e_clock;
 
 ARCHITECTURE clock OF e_clock IS
 
+    COMPONENT divider
+        PORT (
+            clk_in : IN std_logic;
+            clk_out : OUT std_logic
+        );
+    END COMPONENT;
     COMPONENT count_60
         PORT (
             clk, qd, set, clr, mode, clk_en : IN std_logic;
@@ -46,8 +53,8 @@ ARCHITECTURE clock OF e_clock IS
         );
     END COMPONENT;
 
-    SIGNAL cm, cs, tmp : std_logic;
-    --cm分钟->时钟进位，cs秒钟->分钟进位，tmp填充弃置端口
+    SIGNAL clk, cm, cs, tmp : std_logic;
+    --clk1hz脉冲，cm分钟->时钟进位，cs秒钟->分钟进位，tmp填充弃置端口
     SIGNAL hour, mint, secd, a_hour, a_mint : std_logic_vector(7 DOWNTO 0);
     --hour时钟，mint分钟，secd秒钟，a_hour闹钟时钟，a_mint闹钟分钟
     SIGNAL secd7 : std_logic_vector(6 DOWNTO 0);
@@ -56,6 +63,10 @@ ARCHITECTURE clock OF e_clock IS
     --设置状态闪烁控制
 
 BEGIN
+    mod_div : divider PORT MAP(
+        clk_high,
+        clk
+    );
     mod_secd : count_60 PORT MAP(
         clk, qd, set(0), clr(0), mode(0), '1',
         secd,
@@ -134,7 +145,9 @@ BEGIN
     s0 <= secd7(6 DOWNTO 0) OR blink WHEN (mode(1 DOWNTO 0) = "01" AND set(2) = '1') ELSE
         "1111110" WHEN (mode(1 DOWNTO 0) = "10") ELSE
         secd7(6 DOWNTO 0); --正常显示
+
     --output test port--
+    --clk_out <= clk;
     --s0tmp <= secd(3 DOWNTO 0) WHEN (mode(1 DOWNTO 0) = "01" AND set(2) = '1') ELSE
     --    "0000" when (mode(1 DOWNTO 0) = "10") ELSE
     --    secd(3 DOWNTO 0) OR blink;
