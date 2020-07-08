@@ -14,8 +14,10 @@ end music;
 
 architecture music of music is
 
-	signal state : std_logic;                    --蜂鸣器状态寄存
-	signal cnt   : std_logic_vector(1 downto 0); --计数器控制铃声频率，一方面作分频器，一方面作计数器
+	signal state    : std_logic;                    --蜂鸣器状态寄存
+	signal cnt_freq : std_logic_vector(1 downto 0); --频率计数器控制铃声频率
+	signal cnt_len  : std_logic_vector(5 downto 0); --时长计数器控制每个音符的持续时间，保证不同频率的音符有相同的时长
+	signal music    : std_logic;                    --整点报时音乐开关
 
 begin
 	--本次实验采用了两种频率的铃音，由于仿真软件的限制，采用真实的人耳听力范围内的频率会导致仿真时间极短，因此仅用低频铃音作为示范
@@ -23,21 +25,62 @@ begin
 	begin
 		if (clk'event and clk = '1') then
 			if (mode(0) = '1' or mode(1) = '1') then --时间/闹钟设置状态蜂鸣器休眠
-				cnt   <= "00";
-				state <= '0';
-			elsif (mode(2) = '1' and mint = a_mint and hour = a_hour) then --闹钟匹配，将高频输入4分频得到铃音，持续一分钟或者手动关闭闹钟
-				case cnt is
+				cnt_freq <= "00";
+				state    <= '0';
+				music    <= '0';
+			elsif (mode(2) = '1' and mint = a_mint and hour = a_hour) then --闹钟匹配，将高频输入6分频得到铃音，持续一分钟或者手动关闭闹钟
+				case cnt_freq is
 					when "00" =>
-						cnt                <= "11";
-						state              <= not state;
-					when others => cnt <= cnt - 1;
+						cnt_freq                <= "10";
+						state                   <= not state;
+					when others => cnt_freq <= cnt_freq - 1;
 				end case;
-			elsif (mint = "01011001" and secd = "01011001") then --分秒均为59且未处于设置状态，时即将变化，设置整点报时计数器
-				cnt <= "11";
-			elsif (cnt > 0) then --整点报时，将高频输入2分频并持续两个脉冲
-				cnt   <= cnt - 1;
-				state <= not state;
-			else --无响铃事件重置计数器和状态
+				music <= '0';
+			elsif (mint = "01011001" and secd = "01011001") then
+				music    <= '1';
+				cnt_len  <= "110010";
+				cnt_freq <= "01";
+			elsif (music = '1') then --26，14，6，0为时长控制参数，与音符频率有关
+				if (cnt_len > 26) then
+					state   <= not state; --2分频
+					cnt_len <= cnt_len - 1;
+				elsif (cnt_len > 14) then
+					case cnt_freq is
+						when "00" =>
+							cnt_freq                <= "01"; --4分频
+							state                   <= not state;
+							cnt_len                 <= cnt_len - 1;
+						when others => cnt_freq <= cnt_freq - 1;
+					end case;
+				elsif (cnt_len > 6) then
+					case cnt_freq is
+						when "00" =>
+							cnt_freq                <= "10"; --6分频
+							state                   <= not state;
+							cnt_len                 <= cnt_len - 1;
+						when others => cnt_freq <= cnt_freq - 1;
+					end case;
+				elsif (cnt_len > 0) then
+					case cnt_freq is
+						when "00" =>
+							cnt_freq                <= "11"; --8分频
+							state                   <= not state;
+							cnt_len                 <= cnt_len - 1;
+						when others => cnt_freq <= cnt_freq - 1;
+					end case;
+				else --音乐结束重置
+					music    <= '0';
+					cnt_freq <= "00";
+					state    <= '0';
+				end if;
+				--elsif (mint = "01011001" and secd = "01011001") then --分秒均为59且未处于设置状态，时即将变化，设置整点报时计数器
+				--	cnt <= "11";
+				--elsif (cnt > 0) then --整点报时，将高频输入2分频并持续两个脉冲
+				--	cnt   <= cnt - 1;
+				--	state <= not state;
+				--else --无响铃事件重置计数器和状态
+				--	state <= '0';
+			else
 				state <= '0';
 			end if;
 		end if;
