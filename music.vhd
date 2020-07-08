@@ -25,7 +25,7 @@ begin
 		variable tmp : std_logic_vector(1 downto 0);
 	begin
 		if (clk'event and clk = '1') then
-			if (mode(0) = '1' or mode(1) = '1') then --时间/闹钟设置状态蜂鸣器休眠
+			if (mode(0) = '1' or mode(1) = '1') then --时间/闹钟设置状态蜂鸣器休眠，并保证响铃时设置音乐能及时停止
 				cnt_freq <= "00";
 				state    <= '0';
 				music    <= '0';
@@ -37,11 +37,11 @@ begin
 					when others => cnt_freq <= cnt_freq - 1;
 				end case;
 				music <= '0';
-			elsif (mint = "01011001" and secd = "01011001") then
+			elsif (mint = "01011001" and secd = "01011001") then --整点报时音乐激活
 				music    <= '1';
 				cnt_len  <= "110010";
 				cnt_freq <= "01";
-			elsif (music = '1') then --50，26，14，6，0为时长控制参数，与音符频率有关
+			elsif (music = '1') then --50，26，14，6，0为时长控制参数，与音符频率有关，此处为一段5hz,2.5hz,1.67hz,1.25hz的音乐
 				if (cnt_len > 0) then
 					if (cnt_len > 26) then
 						tmp := "00"; --2分频
@@ -64,7 +64,7 @@ begin
 					cnt_freq <= "00";
 					state    <= '0';
 				end if;
-			else
+			else --保证铃声结束后回归初始状态
 				cnt_freq <= "00";
 				state    <= '0';
 			end if;
