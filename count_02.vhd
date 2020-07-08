@@ -1,59 +1,58 @@
-LIBRARY ieee;
-USE ieee.std_logic_1164.ALL;
+library ieee;
+use ieee.std_logic_1164.all;
 
-LIBRARY lpm;
-USE lpm.ALL;
+library lpm;
+use lpm.all;
 
-ENTITY count_02 IS
-	PORT (
-		aclr : IN STD_LOGIC;
-		clk_en : IN STD_LOGIC;
-		clock : IN STD_LOGIC;
-		cout : OUT STD_LOGIC;
-		q : OUT STD_LOGIC_VECTOR (1 DOWNTO 0)
+entity count_02 is
+	port (
+		aclr   : in STD_LOGIC;
+		clk_en : in STD_LOGIC;
+		clock  : in STD_LOGIC;
+		cout   : out STD_LOGIC;
+		q      : out STD_LOGIC_VECTOR (1 downto 0)
 	);
-END count_02;
-ARCHITECTURE SYN OF count_02 IS
+end count_02;
+architecture SYN of count_02 is
 
-	SIGNAL sub_wire0 : STD_LOGIC;
-	SIGNAL sub_wire1 : STD_LOGIC_VECTOR (1 DOWNTO 0);
+	signal sub_wire0 : STD_LOGIC;
+	signal sub_wire1 : STD_LOGIC_VECTOR (1 downto 0);
 
-	COMPONENT lpm_counter
-		GENERIC (
-			lpm_direction : STRING;
-			lpm_modulus : NATURAL;
+	component lpm_counter
+		generic (
+			lpm_direction   : STRING;
+			lpm_modulus     : NATURAL;
 			lpm_port_updown : STRING;
-			lpm_type : STRING;
-			lpm_width : NATURAL
+			lpm_type        : STRING;
+			lpm_width       : NATURAL
 		);
-		PORT (
-			aclr : IN STD_LOGIC;
-			clk_en : IN STD_LOGIC;
-			clock : IN STD_LOGIC;
-			cout : OUT STD_LOGIC;
-			q : OUT STD_LOGIC_VECTOR (1 DOWNTO 0)
+		port (
+			aclr   : in STD_LOGIC;
+			clk_en : in STD_LOGIC;
+			clock  : in STD_LOGIC;
+			cout   : out STD_LOGIC;
+			q      : out STD_LOGIC_VECTOR (1 downto 0)
 		);
-	END COMPONENT;
+	end component;
 
-BEGIN
+begin
 	cout <= sub_wire0;
-	q <= sub_wire1(1 DOWNTO 0);
+	q    <= sub_wire1(1 downto 0);
 
 	LPM_COUNTER_component : LPM_COUNTER
-	GENERIC MAP(
-		lpm_direction => "UP",
-		lpm_modulus => 3,
+	generic map(
+		lpm_direction   => "UP",
+		lpm_modulus     => 3,
 		lpm_port_updown => "PORT_UNUSED",
-		lpm_type => "LPM_COUNTER",
-		lpm_width => 2
+		lpm_type        => "LPM_COUNTER",
+		lpm_width       => 2
 	)
-	PORT MAP(
-		aclr => aclr,
+	port map(
+		aclr   => aclr,
 		clk_en => clk_en,
-		clock => clock,
-		cout => sub_wire0,
-		q => sub_wire1
+		clock  => clock,
+		cout   => sub_wire0,
+		q      => sub_wire1
 	);
 
-END SYN;
-
+end SYN;

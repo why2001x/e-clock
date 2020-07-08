@@ -1,56 +1,58 @@
-LIBRARY ieee;
-USE ieee.std_logic_1164.ALL;
-USE ieee.std_logic_unsigned.ALL;
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.std_logic_unsigned.all;
 
-USE work.Counters.ALL;
+use work.Counters.all;
 
-ENTITY count_24 IS
-	PORT (
-		--clk输入脉冲，qd手动设置脉冲，set对应位设置状态，clr异步重置，mode区分闹钟和时间，clk_en时钟使能
-		clk, qd, set, clr, mode, clk_en : IN std_logic;
-		--小时BCD码2组
-		hour : OUT std_logic_vector(7 DOWNTO 0);
-		--进位输出
-		carry : OUT std_logic
+entity count_24 is
+	port (
+		clk, qd, clk_en : in std_logic;                     --输入脉冲，手动设置脉冲，时钟使能
+		clr, set        : in std_logic;                     --异步重置，设置状态选中
+		mode            : in std_logic;                     --时间/闹钟设置模式
+		hour            : out std_logic_vector(7 downto 0); --时十位及个位BCD码
+		carry           : out std_logic                     --进位输出
 	);
-END count_24;
+end count_24;
 
-ARCHITECTURE count_24 OF count_24 IS
-	SIGNAL t : std_logic_vector(7 DOWNTO 0);
-	SIGNAL clkh : std_logic;
-	SIGNAL newday : std_logic;
-	SIGNAL carryL : std_logic;
-	SIGNAL carryH : std_logic;
-	SIGNAL EN : std_logic;
-BEGIN
-	--正常状态采用clk作为时钟，设置并选中状态采用qd作为时钟
-	clkh <= qd WHEN (mode = '1' AND set = '1') ELSE
-		clk WHEN (mode = '0');
-	--正常状态且使能端使能，或为设置并选中状态时，允许时钟变化
-	EN <= (mode AND set) OR (clk_en AND NOT mode);
-	--新的一天24:XX:XX->00:XX:XX
-	newday <= t(5) AND t(2);
-	--小时低位
-	lowbits : count_09 PORT MAP(
-		aclr => clr OR newday,   --清零信号或新的一天复位
+architecture count_24 of count_24 is
+
+	signal t      : std_logic_vector(7 downto 0);
+	signal clkh   : std_logic; --输入/手动脉冲切换
+	signal newday : std_logic; --作为24进制的检测信号
+	signal carryL : std_logic;
+	signal carryH : std_logic;
+	signal EN     : std_logic;
+
+begin
+
+	clkh <= qd when (mode = '1' and set = '1') else --正常状态采用clk作为时钟，设置并选中状态采用qd作为时钟
+		clk when (mode = '0');
+
+	EN     <= (mode and set) or (clk_en and not mode); --正常状态且使能端使能，或为设置并选中状态时，允许时钟变化
+
+	newday <= t(5) and t(2);                           --新的一天24:XX:XX->00:XX:XX
+
+	--时低位--
+	lowbits : count_09 port map(
+		aclr   => clr or newday, --清零信号或新的一天复位
 		clk_en => EN,            --使能信号
-		clock => clkh,           --小时模块时钟
-		cout => carryL,          --低位进位
-		q => t(3 DOWNTO 0)       --低位BCD输出
+		clock  => clkh,          --时模块时钟
+		cout   => carryL,        --低位进位
+		q      => t(3 downto 0)  --低位BCD输出
 	);
-	--小时高位
-	highbits : count_02 PORT MAP(
-		aclr => clr OR newday,    --清零信号或新的一天复位
-		clk_en => carryL AND EN,  --使能信号且低位为9允许变化
-		clock => clkh,            --小时模块时钟
-		cout => carryH,           --高位进位
-		q => t(5 DOWNTO 4)        --高位BCD输出（低2位）
+
+	--时高位--
+	highbits : count_02 port map(
+		aclr   => clr or newday, --清零信号或新的一天复位
+		clk_en => carryL and EN, --使能信号且低位为9允许变化
+		clock  => clkh,          --时模块时钟
+		cout   => carryH,        --高位进位
+		q      => t(5 downto 4)  --高位BCD输出（低2位）
 	);
-	--高位BCD输出（高2位）
-	t(6) <= '0';
-	t(7) <= '0';
-	--小时进位
-	carry <= NOT(carryH AND carryL) AND NOT mode;
-	--小时BCD码2组输出
-	hour <= t;
-END count_24;
+
+	t(7 downto 6) <= "00";                                --高位BCD输出（高2位）
+
+	carry         <= not(carryH and carryL) and not mode; --时进位，时间/闹钟设置状态取消进位
+
+	hour          <= t;                                   --时BCD码2组输出
+end count_24;

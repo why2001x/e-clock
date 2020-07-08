@@ -1,5 +1,5 @@
-LIBRARY ieee;
-USE ieee.std_logic_1164.ALL;
+library ieee;
+use ieee.std_logic_1164.all;
 
 --	COMPONENT count_0X IS                           --该计数器为0-X循环
 --		PORT (
@@ -9,30 +9,30 @@ USE ieee.std_logic_1164.ALL;
 --		);
 --	END COMPONENT;
 
-PACKAGE Counters IS
+package Counters is
 
-	COMPONENT count_02 IS
-		PORT (
-			aclr, clk_en, clock : IN STD_LOGIC;
-			cout : OUT STD_LOGIC;
-			q : OUT STD_LOGIC_VECTOR (1 DOWNTO 0)
+	component count_02 is
+		port (
+			aclr, clk_en, clock : in STD_LOGIC;
+			cout                : out STD_LOGIC;
+			q                   : out STD_LOGIC_VECTOR (1 downto 0)
 		);
-	END COMPONENT;
+	end component;
 
-	COMPONENT count_05 IS
-		PORT (
-			aclr, clk_en, clock : IN STD_LOGIC;
-			cout : OUT STD_LOGIC;
-			q : OUT STD_LOGIC_VECTOR (2 DOWNTO 0)
+	component count_05 is
+		port (
+			aclr, clk_en, clock : in STD_LOGIC;
+			cout                : out STD_LOGIC;
+			q                   : out STD_LOGIC_VECTOR (2 downto 0)
 		);
-	END COMPONENT;
+	end component;
 
-	COMPONENT count_09 IS
-		PORT (
-			aclr, clk_en, clock : IN STD_LOGIC;
-			cout : OUT STD_LOGIC;
-			q : OUT STD_LOGIC_VECTOR (3 DOWNTO 0)
+	component count_09 is
+		port (
+			aclr, clk_en, clock : in STD_LOGIC;
+			cout                : out STD_LOGIC;
+			q                   : out STD_LOGIC_VECTOR (3 downto 0)
 		);
-	END COMPONENT;
+	end component;
 
-END Counters;
+end Counters;

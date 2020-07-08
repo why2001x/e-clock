@@ -1,30 +1,31 @@
-LIBRARY ieee;
-USE ieee.std_logic_1164.ALL;
-USE ieee.std_logic_unsigned.ALL;
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.std_logic_unsigned.all;
 
-USE work.Counters.ALL;
+entity divider is
+	port (
+		clk_in  : in std_logic; --高频输入
+		clk_out : out std_logic --低频输出
+	);
+end divider;
 
-ENTITY divider IS
-    PORT (
-        clk_in : IN std_logic;
-        clk_out : OUT std_logic
-    );
-END divider;
+architecture divider of divider is
 
-ARCHITECTURE divider OF divider IS
-    SIGNAL state : std_logic;
-    SIGNAL cnt : std_logic_vector(2 DOWNTO 0);
-BEGIN
-    PROCESS (clk_in)
-    BEGIN
-        IF (clk_in'event AND clk_in = '1') THEN
-            CASE cnt IS
-                WHEN "100" =>
-                    state <= NOT state;
-                    cnt <= "000";
-                WHEN OTHERS => cnt <= cnt + 1;
-            END CASE;
-        END IF;
-    END PROCESS;
-    clk_out <= state;
-END divider;
+	signal cnt   : std_logic_vector(2 downto 0); --分频计数器
+	signal state : std_logic;                    --脉冲状态寄存
+
+begin
+	process (clk_in)
+	begin
+		if (clk_in'event and clk_in = '1') then
+			case cnt is
+				when "100" => --(4+1)*2=10分频
+					state              <= not state;
+					cnt                <= "000";
+				when others => cnt <= cnt + 1;
+			end case;
+		end if;
+	end process;
+
+	clk_out <= state;
+end divider;
