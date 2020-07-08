@@ -2,9 +2,6 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 
---闹钟音乐
---引脚
-
 entity e_clock is
 	port (
 		clk_high, qd : in std_logic;                     --高频时钟脉冲，手动输入脉冲
@@ -177,7 +174,7 @@ begin
 	blink7   <= (not clk, not clk, not clk, not clk, not clk, not clk, not clk);
 
 	--3.时/分输出赋值--
-	h1       <=
+	h1 <=
 		hour(7 downto 4) or blinkBCD when (mode(1 downto 0) = "01" and set(2) = '1') else --时间设置选中（闪烁）
 		a_hour(7 downto 4) when (mode(1) = '1' and set(2) = '0') else                     --闹钟设置未选中
 		a_hour(7 downto 4) or blinkBCD when (mode(1) = '1' and set(2) = '1') else         --闹钟设置选中（闪烁）
