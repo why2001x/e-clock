@@ -8,7 +8,7 @@ use ieee.std_logic_unsigned.all;
 entity e_clock is
 	port (
 		clk_high, qd : in std_logic;                     --高频时钟脉冲，手动输入脉冲
-``
+
 		clr, set     : in std_logic_vector(2 downto 0);  --异步重置，设置状态选中，高位到低位对应时分秒
 
 		mode         : in std_logic_vector(2 downto 0);  --高位到低位对应闹钟开关，闹钟设置，时间设置
