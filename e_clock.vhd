@@ -197,11 +197,11 @@ begin
 
 	--4.秒输出赋值--
 	s1 <=
-		secd(7 downto 4) or blinkBCD when (mode(1 downto 0) = "01" and set(2) = '1') else --时间设置选中（闪烁）
+		secd(7 downto 4) or blinkBCD when (mode(1 downto 0) = "01" and set(0) = '1') else --时间设置选中（闪烁）
 		"0000" when (mode(1) = '1') else                                                  --无闹钟设置，强制置零
 		secd(7 downto 4);                                                                 --其余状态
 	s0 <=
-		secd7(6 downto 0) and blink7 when (mode(1 downto 0) = "01" and set(2) = '1') else
+		secd7(6 downto 0) and blink7 when (mode(1 downto 0) = "01" and set(0) = '1') else
 		"1111110" when (mode(1) = '1') else
 		secd7(6 downto 0);
 
