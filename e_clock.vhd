@@ -65,17 +65,26 @@ architecture clock of e_clock is
 		);
 	end component;
 
+	component led
+		port (
+			clk              : in std_logic;
+			hour, mint, secd : in std_logic_vector(7 downto 0);
+			a_hour, a_mint   : in std_logic_vector(7 downto 0);
+			mode             : in std_logic_vector(1 downto 0);
+			set              : in std_logic_vector(2 downto 0);
+			h1, h0           : out std_logic_vector(3 downto 0);
+			m1, m0           : out std_logic_vector(3 downto 0);
+			s1               : out std_logic_vector(3 downto 0);
+			s0               : out std_logic_vector(6 downto 0)
+		);
+	end component;
+
 	signal clk              : std_logic;                    --1hz脉冲
 
 	signal cs, cm, tmp      : std_logic;                    --cs秒->分进位，cm分->时进位，tmp填充弃置进位端口
 
 	signal hour, mint, secd : std_logic_vector(7 downto 0); --时，分，秒
 	signal a_hour, a_mint   : std_logic_vector(7 downto 0); --闹钟时，闹钟分
-
-	signal secd7            : std_logic_vector(6 downto 0); --暂存秒个位BCD码->七段码
-
-	signal blinkBCD         : std_logic_vector(3 downto 0); --BCD设置状态闪烁控制
-	signal blink7           : std_logic_vector(6 downto 0); --七段设置状态闪烁控制
 
 begin
 	--分频--
@@ -156,56 +165,23 @@ begin
 		carry  => tmp      --闹钟状态取消进位，端口弃置
 	);
 
-	--输出显示控制--
-	--1.秒个位BCD码转七段码--
-	secd7 <=
-		"1111110" when (secd(3 downto 0) = "0000") else
-		"0110000" when (secd(3 downto 0) = "0001") else
-		"1101101" when (secd(3 downto 0) = "0010") else
-		"1111001" when (secd(3 downto 0) = "0011") else
-		"0110011" when (secd(3 downto 0) = "0100") else
-		"1011011" when (secd(3 downto 0) = "0101") else
-		"1011111" when (secd(3 downto 0) = "0110") else
-		"1110000" when (secd(3 downto 0) = "0111") else
-		"1111111" when (secd(3 downto 0) = "1000") else
-		"1111011" when (secd(3 downto 0) = "1001") else
-		"0000000";
-
-	--2.设置状态，假定BCD显示灯输入为全1时，熄灭，则将BCD与blinkBCD取或，假定七段显示灯输入全0时，熄灭，则将七段与blink7取与--
-	blinkBCD <= (clk, clk, clk, clk);
-	blink7   <= (not clk, not clk, not clk, not clk, not clk, not clk, not clk);
-
-	--3.时/分输出赋值--
-	h1 <=
-		hour(7 downto 4) or blinkBCD when (mode(1 downto 0) = "01" and set(2) = '1') else --时间设置选中（闪烁）
-		a_hour(7 downto 4) when (mode(1) = '1' and set(2) = '0') else                     --闹钟设置未选中
-		a_hour(7 downto 4) or blinkBCD when (mode(1) = '1' and set(2) = '1') else         --闹钟设置选中（闪烁）
-		hour(7 downto 4);                                                                 --其余状态
-	h0 <=
-		hour(3 downto 0) or blinkBCD when (mode(1 downto 0) = "01" and set(2) = '1') else
-		a_hour(3 downto 0) when (mode(1) = '1' and set(2) = '0') else
-		a_hour(3 downto 0) or blinkBCD when (mode(1) = '1' and set(2) = '1') else
-		hour(3 downto 0);
-	m1 <=
-		mint(7 downto 4) or blinkBCD when (mode(1 downto 0) = "01" and set(1) = '1') else
-		a_mint(7 downto 4) when (mode(1) = '1' and set(1) = '0') else
-		a_mint(7 downto 4) or blinkBCD when (mode(1) = '1' and set(1) = '1') else
-		mint(7 downto 4);
-	m0 <=
-		mint(3 downto 0) or blinkBCD when (mode(1 downto 0) = "01" and set(1) = '1') else
-		a_mint(3 downto 0) when (mode(1) = '1' and set(1) = '0') else
-		a_mint(3 downto 0) or blinkBCD when (mode(1) = '1' and set(1) = '1') else
-		mint(3 downto 0);
-
-	--4.秒输出赋值--
-	s1 <=
-		secd(7 downto 4) or blinkBCD when (mode(1 downto 0) = "01" and set(0) = '1') else --时间设置选中（闪烁）
-		"0000" when (mode(1) = '1') else                                                  --无闹钟设置，强制置零
-		secd(7 downto 4);                                                                 --其余状态
-	s0 <=
-		secd7(6 downto 0) and blink7 when (mode(1 downto 0) = "01" and set(0) = '1') else
-		"1111110" when (mode(1) = '1') else
-		secd7(6 downto 0);
+	--显示输出控制--
+	mod_led : led port map(
+		clk    => clk,
+		hour   => hour,
+		mint   => mint,
+		secd   => secd,
+		a_hour => a_hour,
+		a_mint => a_mint,
+		mode   => mode(1 downto 0),
+		set    => set,
+		h1     => h1,
+		h0     => h0,
+		m1     => m1,
+		m0     => m0,
+		s1     => s1,
+		s0     => s0
+	);
 
 	--output test port--
 	--clk_out <= clk;

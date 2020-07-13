@@ -41,16 +41,16 @@ begin
 				music    <= '1';
 				cnt_len  <= "10111";
 				cnt_freq <= "0000";
-			elsif (music = '1') then --50，26，14，6，0为时长控制参数，与音符频率有关，此处为一段5hz,2.5hz,1.67hz,1.25hz的音乐--25.5,17,15,19
+			elsif (music = '1') then --23，19，13，6，0为时长控制参数，与音符频率有关，此处为一段旋律为so re mi do的《威斯敏斯特钟声》片段
 				if (cnt_len > 0) then
 					if (cnt_len > 19) then
-						tmp := "1100"; --26分频,4
+						tmp := "1100"; --so，26分频,持续4
 					elsif (cnt_len > 13) then
-						tmp := "0111"; --16分频,6
+						tmp := "0111"; --re，16分频,持续6
 					elsif (cnt_len > 6) then
-						tmp := "0110"; --14分频,7
+						tmp := "0110"; --mi，14分频,持续7
 					else
-						tmp := "1000"; --18分频,6
+						tmp := "1000"; --do，分频,持续6
 					end if;
 					case cnt_freq is
 						when "0000" =>
