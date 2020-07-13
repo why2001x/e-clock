@@ -11,17 +11,17 @@ end divider;
 
 architecture divider of divider is
 
-	signal cnt   : std_logic_vector(2 downto 0); --分频计数器
-	signal state : std_logic;                    --脉冲状态寄存
+	signal cnt   : std_logic_vector(12 downto 0); --分频计数器
+	signal state : std_logic;                     --脉冲状态寄存
 
 begin
 	process (clk_in)
 	begin
 		if (clk_in'event and clk_in = '1') then
 			case cnt is
-				when "100" => --(4+1)*2=10分频
+				when "1001110000111" => --(4999+1)*2=10k分频
 					state              <= not state;
-					cnt                <= "000";
+					cnt                <= "0000000000000";
 				when others => cnt <= cnt + 1;
 			end case;
 		end if;
