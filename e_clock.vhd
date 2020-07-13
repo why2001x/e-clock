@@ -6,7 +6,9 @@ entity e_clock is
 	port (
 		clk_high, qd : in std_logic;                     --高频时钟脉冲，手动输入脉冲
 
-		clr, set     : in std_logic_vector(2 downto 0);  --异步重置，设置状态选中，高位到低位对应时分秒
+		clr          : in std_logic;                     --全局重置
+
+		set          : in std_logic_vector(2 downto 0);  --设置状态选中，高位到低位对应时分秒
 
 		mode         : in std_logic_vector(2 downto 0);  --高位到低位对应闹钟开关，闹钟设置，时间设置
 
@@ -87,7 +89,7 @@ begin
 		clk     => clk,
 		qd      => qd,
 		clk_en  => '1', --时间使能
-		clr     => clr(0),
+		clr     => clr,
 		set     => set(0),
 		mode    => mode(0), --时间设置
 		min_sec => secd,    --秒
@@ -99,7 +101,7 @@ begin
 		clk     => cs, --秒->分进位作为输入
 		qd      => qd,
 		clk_en  => '1', --时间使能
-		clr     => clr(1),
+		clr     => clr,
 		set     => set(1),
 		mode    => mode(0), --时间设置
 		min_sec => mint,    --分
@@ -111,7 +113,7 @@ begin
 		clk    => cm, --分->时进位作为输入
 		qd     => qd,
 		clk_en => '1', --时间使能
-		clr    => clr(2),
+		clr    => clr,
 		set    => set(2),
 		mode   => mode(0), --时间设置
 		hour   => hour,    --时
@@ -135,7 +137,7 @@ begin
 		clk     => clk, --闹钟不使用此时钟，任意选择
 		qd      => qd,
 		clk_en  => '0', --闹钟状态时间使能取非
-		clr     => clr(1),
+		clr     => clr,
 		set     => set(1),
 		mode    => mode(1), --闹钟设置
 		min_sec => a_mint,  --闹钟分
@@ -147,7 +149,7 @@ begin
 		clk    => clk, --闹钟不使用此时钟，任意选择
 		qd     => qd,
 		clk_en => '0', --闹钟状态时间使能取非
-		clr    => clr(2),
+		clr    => clr,
 		set    => set(2),
 		mode   => mode(1), --闹钟设置
 		hour   => a_hour,  --闹钟时
