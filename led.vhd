@@ -4,11 +4,11 @@ use ieee.std_logic_unsigned.all;
 
 entity led is
         port (
-                clk              : in std_logic;
-                hour, mint, secd : in std_logic_vector(7 downto 0);
-                a_hour, a_mint   : in std_logic_vector(7 downto 0);
-                mode             : in std_logic_vector(1 downto 0);
-                set              : in std_logic_vector(2 downto 0);
+                clk              : in std_logic;--闪烁控制
+                hour, mint, secd : in std_logic_vector(7 downto 0); --时间
+                a_hour, a_mint   : in std_logic_vector(7 downto 0); --闹钟时间
+                mode             : in std_logic_vector(1 downto 0); --判断具体设置状态
+                set              : in std_logic_vector(2 downto 0); --控制对应位的闪烁
                 h1, h0           : out std_logic_vector(3 downto 0);
                 m1, m0           : out std_logic_vector(3 downto 0);
                 s1               : out std_logic_vector(3 downto 0);
@@ -18,9 +18,9 @@ end led;
 
 architecture led of led is
 
-        signal blinkBCD : std_logic_vector(3 downto 0);
-        signal blink7   : std_logic_vector(6 downto 0);
-        signal secd7    : std_logic_vector(6 downto 0);
+        signal blinkBCD : std_logic_vector(3 downto 0); --BCD闪烁掩码
+        signal blink7   : std_logic_vector(6 downto 0); --七段闪烁掩码
+        signal secd7    : std_logic_vector(6 downto 0); --暂存七段码
 
 begin
         --输出显示控制--
